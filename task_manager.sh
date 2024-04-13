@@ -8,7 +8,7 @@ if [ ! -f "$file" ]; then
     echo "Database created"
 fi
 
-display_menu() {
+main_menu() {
     echo "Task Management System"
     echo "1. Display Tasks"
     echo "2. Add Task"
@@ -21,14 +21,15 @@ display_menu() {
 display_task() {
     task_id="$1"
     echo "Task details: "
-    awk -F"," 'NR == 1 { printf "%s\t%s\t%s\t\t%s\t\t%s\n", $1, $2, $3, $4, $5 }' "$file"
+    awk -F"," 'NR == 1 { printf "%s\t%s\t%s\t\t%s\t%s\n", $1, $2, $3, $4, $5 }' "$file"
     awk -v id="$task_id" -F"," '$1 == id { printf "%s\t%s\t%s\t\t%s\t\t%s\n", $1, $2, $3, $4, $5 }' "$file"
     echo ""
 }
 
 display_tasks() {
     echo "Tasks: "
-    awk -F"," '{ printf "%s\t%s\t%s\t\t%s\t\t%s\n", $1, $2, $3, $4, $5 }' "$file"
+    awk -F"," 'NR == 1 { printf "%s\t%s\t%s\t\t%s\t%s\n", $1, $2, $3, $4, $5 }' "$file"
+    awk -F"," 'NR > 1 { printf "%s\t%s\t%s\t\t%s\t\t%s\n", $1, $2, $3, $4, $5 }' "$file"
     echo ""
 }
 
@@ -60,30 +61,72 @@ change_task_status() {
         display_task "$task_id"
 
         # status options
-        echo -e "[ Done(d) | Skipped(s) | In Progress(p) ]\nEnter new status (d/s/p): "
+        echo -e -n "[ Done(d) | Skipped(s) | In Progress(p) ]\nEnter new status (d/s/p): "
         read new_sts
 
-        if [ "$new_sts" == 'd' ]; then
-            new_status="Done"
-        elif [ "$new_sts" == 's' ]; then
-            new_status="Skipped"
-        elif [ "$new_sts" == 'p' ]; then
-            new_status="In Progress"
-        else
-            echo "Invalid status. Please enter 'd', 's', or 'p'."
-            return
-        fi
+        case "$new_sts" in
+            d) new_status="Done" ;;
+            s) new_status="Skipped" ;;
+            p) new_status="In Progress" ;;
+            *)
+                echo -e "Invalid status. Please enter 'd', 's', or 'p'.\n"
+                return
+                ;;
+        esac
 
         # apply the change
         temp_file="temp.csv"
 
-        awk -v id="$task_id" -v status="$new_status" -F="," '{if ($1 == id) { $3 = status } print }' "$file"
+        awk -v id="$task_id" -v status="$new_status" -F", " '{if ($1 == id) { $3 = status } { printf "%s, %s, %s, %s, %s\n", $1, $2, $3, $4, $5 } }' "$file" > "$temp_file"
         mv "$temp_file" "$file"
 
         echo -e "Status of task with ID $task_id changed to $new_status.\n"
     else
         echo -e "Task with ID $task_id does not exist.\n"
     fi
+}
+
+change_name() {
+    task_id="$1"
+
+    echo -e -n "Enter new name: "
+    read new_name
+
+    # apply the change
+    temp_file="temp.csv"
+
+    awk -v id="$task_id" -v name="$new_name" -F", " '{if ($1 == id) { $2 = name } { printf "%s, %s, %s, %s, %s\n", $1, $2, $3, $4, $5 } }' "$file" > "$temp_file"
+    mv "$temp_file" "$file"
+
+    echo -e "Name of task with ID $task_id changed to $new_name.\n"
+}
+
+change_due_date() {
+    task_id="$1"
+    echo -e -n "Enter new due date: "
+    read new_date
+
+    # apply the change
+    temp_file="temp.csv"
+
+    awk -v id="$task_id" -v date="$new_date" -F", " '{if ($1 == id) { $4 = date } { printf "%s, %s, %s, %s, %s\n", $1, $2, $3, $4, $5 } }' "$file" > "$temp_file"
+    mv "$temp_file" "$file"
+
+    echo -e "Due date of task with ID $task_id changed to $new_date.\n"
+}
+
+change_description() {
+    task_id="$1"
+    echo -e -n "Enter new description: "
+    read new_desc
+
+    # apply the change
+    temp_file="temp.csv"
+
+    awk -v id="$task_id" -v desc="$new_desc" -F", " '{if ($1 == id) { $5 = desc } { printf "%s, %s, %s, %s, %s\n", $1, $2, $3, $4, $5 } }' "$file" > "$temp_file"
+    mv "$temp_file" "$file"
+
+    echo -e "Description of task with ID $task_id changed to $new_desc.\n"
 }
 
 edit_menu() {
@@ -141,7 +184,7 @@ remove_task() {
 }
 
 while true; do
-    display_menu
+    main_menu
     echo -n "Enter your choice: "
     read choice
     
