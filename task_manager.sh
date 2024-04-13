@@ -21,15 +21,15 @@ main_menu() {
 display_task() {
     task_id="$1"
     echo "Task details: "
-    awk -F"," 'NR == 1 { printf "%s\t%s\t%s\t\t%s\t%s\n", $1, $2, $3, $4, $5 }' "$file"
-    awk -v id="$task_id" -F"," '$1 == id { printf "%s\t%s\t%s\t\t%s\t\t%s\n", $1, $2, $3, $4, $5 }' "$file"
+    awk -F", " 'NR == 1 { printf "%s\t%s\t%s\t\t%s\t\t%s\n", $1, $2, $3, $4, $5 }' "$file"
+    awk -v id="$task_id" -F", " '$1 == id { printf "%s\t%s\t%s\t\t%s\t\t%s\n", $1, $2, $3, $4, $5 }' "$file"
     echo ""
 }
 
 display_tasks() {
     echo "Tasks: "
-    awk -F"," 'NR == 1 { printf "%s\t%s\t%s\t\t%s\t%s\n", $1, $2, $3, $4, $5 }' "$file"
-    awk -F"," 'NR > 1 { printf "%s\t%s\t%s\t\t%s\t\t%s\n", $1, $2, $3, $4, $5 }' "$file"
+    awk -F", " 'NR == 1 { printf "%s\t%s\t%s\t\t%s\t\t%s\n", $1, $2, $3, $4, $5 }' "$file"
+    awk -F", " 'NR > 1 { printf "%s\t%s\t%s\t\t%s\t\t%s\n", $1, $2, $3, $4, $5 }' "$file"
     echo ""
 }
 
