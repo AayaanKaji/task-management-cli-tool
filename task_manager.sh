@@ -50,7 +50,7 @@ add_task() {
     read description
     
     echo -e "\n$new_id, $name, "In Progress", $due_date, $description" >> "$file"
-    echo "Task added successfully, with ID: $new_id\n"
+    echo -e "Task added successfully, with ID: $new_id\n"
 }
 
 change_task_status() {
